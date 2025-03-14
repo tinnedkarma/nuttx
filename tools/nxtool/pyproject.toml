@@ -17,7 +17,8 @@ dependencies = [
 ]
 
 [project.scripts]
-nxtool = "nxtool.__main__:nxt.run"
+nxtool = "nxtool:__main__"
+nxstyle = "nxtool.nxstyle:__main__"
 
 [build-system]
 requires = ["setuptools"]

@@ -8,6 +8,7 @@ import shutil
 import pty
 import importlib.resources
 
+from nxtool.nxstyle.nxstyle import Checker, CChecker
 
 class NxCheckpatch():
     """
@@ -38,11 +39,13 @@ class NxCheckpatch():
 
         self.argparser.add_argument(
             "file",
-            type=Path,
-            help="File to check"
+            type = Path,
+            help = "File to check"
         )
 
         self.argparser.set_defaults(func=self.__run)
+
+        self.checker: Checker | None = None
 
     def __run(self, args: Namespace) -> None:
         """
@@ -53,7 +56,7 @@ class NxCheckpatch():
         :param args: Attribute storage resolved by argparge
         :type args: Namespace
         """
-        file_path:Path = Path(args.file)
+        file_path: Path = Path(args.file)
 
         if args.spell is True:
             pty.spawn([
@@ -72,6 +75,11 @@ class NxCheckpatch():
             sys.exit(0)
 
         match file_path.suffix:
+            case '.c':
+                self.checker = CChecker(file_path, 'c.scm')
+
+            case '.h':
+                pass
 
             case '.rs':
                 if shutil.which("rustfmt") is not None:
@@ -81,30 +89,42 @@ class NxCheckpatch():
                         "--check",
                         str(file_path)
                     ])
+                    sys.exit(0)
                 else:
                     sys.exit(1)
 
             case '.py':
-                with importlib.resources.path("nxtool.nxstyle.config", "setup.cfg") as config_path:
+                with importlib.resources.path(
+                    "nxtool.nxstyle.config", "setup.cfg"
+                ) as config_path:
                     pty.spawn([
                         "python", "-m",
                         "flake8", "--config", str(config_path),
                         str(file_path)
                     ])
+                sys.exit(0)
 
             case '.cmake':
                 pty.spawn([
                     "python", "-m", "cmakelang.lint", str(file_path)
                 ])
+                sys.exit(0)
 
-            # Here we should also handle the hardcoded names
+            # Here we should handle the hardcoded names
             case _:
                 if file_path.name == 'CMakeLists.txt':
-                    with importlib.resources.path("nxstyle.config", "setup.cfg") as config_path:
+                    with importlib.resources.path(
+                        "nxtool.nxstyle.config", "setup.cfg"
+                    ) as config_path:
                         pty.spawn([
                             "python", "-m",
                             "flake8", "--config", f"{config_path}",
                             str(file_path)
                         ])
-
+                    sys.exit(0)
                 sys.exit(1)
+
+        if self.checker is None:
+            sys.exit(0)
+
+        self.checker.check_style()

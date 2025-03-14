@@ -6,12 +6,13 @@ from nxtool.cmds.checkpatch import NxCheckpatch
 class NxTool():
     def __init__(self):
         self.argparser: argparse.ArgumentParser = argparse.ArgumentParser(
-            description="My CLI tool"
+            prog = "nxtool",
+            description = "My CLI tool"
         )
 
         self.argsubparser = self.argparser.add_subparsers(
-            title='commands',
-            required=True
+            title = 'commands',
+            required = True
         )
 
         self.nxstyle: NxCheckpatch = NxCheckpatch(self.argsubparser)
