@@ -1,0 +1,6 @@
+dist
+build
+nxtool.egg-info
+.env
+.vscode
+__pycache__
