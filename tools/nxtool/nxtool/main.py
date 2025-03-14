@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+from nxtool.cmds.checkpatch import NxCheckpatch
 
 
 class NxTool():
@@ -13,6 +14,7 @@ class NxTool():
             required=True
         )
 
+        self.nxstyle: NxCheckpatch = NxCheckpatch(self.argsubparser)
 
     def run(self):
         """
