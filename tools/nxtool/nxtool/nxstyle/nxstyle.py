@@ -104,7 +104,7 @@ class CChecker(Checker):
     Checker class for analyzing and processing syntax trees for c source files.
     """
 
-    def __init__(self, file: Path, scm: str):
+    def __init__(self, file: Path, scm: str) -> None:
 
         try:
             with open(file.as_posix(), 'rb') as fd:
@@ -141,23 +141,25 @@ class CChecker(Checker):
                 self.__check_indents_if_statement(indent, node)
             case "for_statement":
                 self.__check_indents_for_statement(indent, node)
-            case "while_statement":
+            case "while_statement" | "do_statement":
                 self.__check_indents_while_statement(indent, node)
             case "switch_statement":
                 self.__check_indents_switch_statement(indent, node)
             case (
                 "return_statement" |
-                "expression_statement"
+                "expression_statement" |
+                "declaration" | 
+                "break_statement"
             ):
                 for child in node.named_children:
                     self.__check_indents(indent + 2, child)
-
-                self.style_assert(
-                    node.start_point.column != indent,
-                    self.error(node.start_point, "Wrong indentation")
-                )
             case _:
                 return
+
+        self.style_assert(
+            node.start_point.column != indent,
+            self.error(node.start_point, "Wrong indentation")
+        )
 
     def  __check_indents_if_statement(self, indent: int, node: Node) -> None:
         """
@@ -169,22 +171,13 @@ class CChecker(Checker):
         
         """
 
-        # Unwrap if_statement node
-        if_keyword: Node = node.children[0]
-        condition: Node = node.child_by_field_name("condition")
         consequence: Node = node.child_by_field_name("consequence")
         alternative: Node | None = node.child_by_field_name("alternative")
 
-        # Between "if" keyword and condition node should be an whitespace
-        self.style_assert(
-            (condition.start_point.column - if_keyword.end_point.column) != 1,
-            self.error(if_keyword.end_point, "Missing whitespace after keyword")
-        )
-
         # Open braket should be on separate line
         self.style_assert(
-            consequence.children[0].start_point.row == condition.start_point.row,
-            self.error(condition.start_point, "Left bracket not on separate line")
+            consequence.start_point.row == node.start_point.row,
+            self.error(consequence.start_point, "Left bracket not on separate line")
         )
 
         # Open braket should be indented by two whitespaces
@@ -199,7 +192,7 @@ class CChecker(Checker):
         # Close braket should be on separate line
         self.style_assert(
             consequence.children[-1].start_point.row == consequence.children[-2].start_point.row,
-            self.error(condition.start_point, "Left bracket not on separate line")
+            self.error(consequence.start_point, "Left bracket not on separate line")
         )
 
         # Close braket should be indented by two whitespaces
@@ -220,89 +213,30 @@ class CChecker(Checker):
             self.__check_indents(indent, alternative.children[1])
 
     def  __check_indents_for_statement(self, indent: int, node: Node) -> None:
+        """
+        Defered work for for statements.
+        For statement node checks should take into account the node structure.
+        Indent and alignments checks will be handled here
 
-        align: bool = False
-        align_start_point: Point | None = None
+        :param indent: The current indent level.
+        :type indent: int
+        :param node: The node to check.
+        :type node: Node
+        """
 
-        # Unwrap for_statement node
-        for_keyword: Node = node.children[0]
-        initializer: Node | None = node.child_by_field_name("initializer")
-        condition: Node | None = node.child_by_field_name("condition")
-        update: Node | None = node.child_by_field_name("update")
         body: Node = node.child_by_field_name("body")
-
-        # Between "for" keyword and condition node should be an whitespace
-        self.style_assert(
-            (for_keyword.next_sibling.start_point.column - for_keyword.end_point.column) != 1,
-            self.error(for_keyword.end_point, "Missing whitespace after keyword")
-        )
-
-        if initializer is not None:
-
-            align_start_point = initializer.start_point
-
-            self.style_assert(
-                (initializer.start_point.column - initializer.prev_sibling.end_point.column) != 0,
-                self.error(initializer.end_point, "Missing whitespace after keyword")
-            )
-
-            self.style_assert(
-                (initializer.next_sibling.start_point.column - initializer.end_point.column) != 0,
-                self.error(initializer.end_point, "Operator must be next to an operand")
-            )
-
-        if condition is not None:
-
-            self.style_assert(
-                (condition.next_sibling.start_point.column - condition.end_point.column) != 0,
-                self.error(condition.end_point, "Operator must be next to an operand")
-            )
-
-            if (
-                align_start_point is not None and
-                condition.start_point.row != align_start_point.row
-            ):
-                align = True
-                self.style_assert(
-                    condition.start_point.column != initializer.start_point.column,
-                    self.error(condition.end_point, "Missaligned statements")
-                )
-
-            else:
-                self.style_assert(
-                    (condition.start_point.column - condition.prev_sibling.end_point.column) != 1,
-                    self.error(condition.end_point, "Missing whitespace after keyword")
-                )
-
-        if update is not None:
-
-            self.style_assert(
-                (update.next_sibling.start_point.column - update.end_point.column) != 0,
-                self.error(update.end_point, "Operator must be next to an operand")
-            )
-
-            if align is True:
-                self.style_assert(
-                    update.start_point.column != initializer.start_point.column,
-                    self.error(update.end_point, "Missaligned statements")
-                )
-            else:
-                self.style_assert(
-                    (update.start_point.column - update.prev_sibling.end_point.column) != 1,
-                    self.error(update.end_point, "Missing whitespace after keyword")
-                )
 
         if body.type == "compound_statement":
 
             # Open braket should be on separate line
             self.style_assert(
-                body.children[0].start_point.row == for_keyword.start_point.row,
+                body.start_point.row == body.prev_sibling.start_point.row,
                 self.error(body.start_point, "Left bracket not on separate line")
             )
 
             # Open braket should be indented by two whitespaces
             self.style_assert(
-                body.children[0].start_point.column != indent + 2,
+                body.start_point.column != indent + 2,
                 self.error(body.start_point, "Wrong indentation")
             )
 
@@ -312,7 +246,7 @@ class CChecker(Checker):
             # Close braket should be on separate line
             self.style_assert(
                 body.children[-1].start_point.row == body.children[-2].start_point.row,
-                self.error(condition.start_point, "Left bracket not on separate line")
+                self.error(body.start_point, "Left bracket not on separate line")
             )
 
             # Close braket should be indented by two whitespaces
@@ -326,7 +260,7 @@ class CChecker(Checker):
             if body.named_child_count == 0:
                 self.style_assert(
                     body.prev_sibling.start_point.row != body.start_point.row,
-                    self.error(condition.start_point, "Empty body should be inline with last node")
+                    self.error(body.start_point, "Empty body should be inline with last node")
                 )
 
             else:
@@ -334,26 +268,28 @@ class CChecker(Checker):
                     self.__check_indents(indent + 4, n)
 
     def __check_indents_while_statement(self, indent: int, node: Node) -> None:
-        # Unwrap while_statement node
-        while_keyword: Node = node.children[0]
-        condition: Node = node.child_by_field_name("condition")
-        body: Node = node.child_by_field_name("body")
+        """
+        Defered work for while statements.
+        While statement node checks should take into account the node structure.
+        Indent and alignments checks will be handled here
 
-        # Between "while" keyword and condition node should be an whitespace
-        self.style_assert(
-            (condition.start_point.column - while_keyword.end_point.column) != 1,
-            self.error(while_keyword.end_point, "Missing whitespace after keyword")
-        )
+        :param indent: The current indent level.
+        :type indent: int
+        :param node: The node to check.
+        :type node: Node
+        """
+
+        body: Node = node.child_by_field_name("body")
 
         # Open braket should be on separate line
         self.style_assert(
-            body.children[0].start_point.row == condition.start_point.row,
-            self.error(condition.start_point, "Left bracket not on separate line")
+            body.start_point.row == body.prev_sibling.start_point.row,
+            self.error(body.start_point, "Left bracket not on separate line")
         )
 
         # Open braket should be indented by two whitespaces
         self.style_assert(
-            body.children[0].start_point.column != indent + 2,
+            body.start_point.column != indent + 2,
             self.error(body.start_point, "Wrong indentation")
         )
 
@@ -363,7 +299,7 @@ class CChecker(Checker):
         # Close braket should be on separate line
         self.style_assert(
             body.children[-1].start_point.row == body.children[-2].start_point.row,
-            self.error(condition.start_point, "Left bracket not on separate line")
+            self.error(body.children[-1].start_point, "Left bracket not on separate line")
         )
 
         # Close braket should be indented by two whitespaces
@@ -373,27 +309,28 @@ class CChecker(Checker):
         )
 
     def __check_indents_switch_statement(self, indent: int, node: Node) -> None:
-        # Unwrap switch_statement node
-        print(f"{node.start_point}")
-        switch_keyword: Node = node.children[0]
-        condition: Node = node.child_by_field_name("condition")
-        body: Node = node.child_by_field_name("body")
+        """
+        Defered work for switch statements.
+        Switch statement node checks should take into account the node structure.
+        Indent and alignments checks will be handled here.
 
-        # Between "while" keyword and condition node should be an whitespace
-        self.style_assert(
-            (condition.start_point.column - switch_keyword.end_point.column) != 1,
-            self.error(switch_keyword.end_point, "Missing whitespace after keyword")
-        )
+        :param indent: The current indent level.
+        :type indent: int
+        :param node: The node to check.
+        :type node: Node
+        """
+
+        body: Node = node.child_by_field_name("body")
 
         # Open braket should be on separate line
         self.style_assert(
-            body.children[0].start_point.row == switch_keyword.start_point.row,
+            body.start_point.row == body.prev_sibling.start_point.row,
             self.error(body.start_point, "Left bracket not on separate line")
         )
 
         # Open braket should be indented by two whitespaces
         self.style_assert(
-            body.children[0].start_point.column != indent + 2,
+            body.start_point.column != indent + 2,
             self.error(body.start_point, "Wrong indentation")
         )
 
@@ -404,7 +341,7 @@ class CChecker(Checker):
         # Close braket should be on separate line
         self.style_assert(
             body.children[-1].start_point.row == body.children[-2].start_point.row,
-            self.error(condition.start_point, "Left bracket not on separate line")
+            self.error(body.start_point, "Left bracket not on separate line")
         )
 
         # Close braket should be indented by two whitespaces
@@ -414,32 +351,54 @@ class CChecker(Checker):
         )
 
     def __check_indents_case_statement(self, indent: int, node: Node) -> None:
-        # Unwrap switch_statement node
-        case_keyword: Node = node.children[0]
-        value: Node = node.child_by_field_name("value")
+        """
+        Defered work for case statements.
+        Case statement node checks should take into account the node structure.
+        Indent and alignments checks will be handled here.
+
+        :param indent: The current indent level.
+        :type indent: int
+        :param node: The node to check.
+        :type node: Node
+        """
+
+        kw: Node = node.children[0]
+        offset: int = 3 if kw.type == "case" else 2
+        body: Node = node.children[offset]
 
         self.style_assert(
             node.start_point.column != indent,
             self.error(node.start_point, "Wrong indentation")
         )
 
-        if case_keyword.type == "case":
-
-            # Between "case" keyword and value node should be an whitespace
+        if body.type == "compound_statement":
+            # Open braket should be on separate line
             self.style_assert(
-                (value.start_point.column - case_keyword.end_point.column) != 1,
-                self.error(value.end_point, "Missing whitespace after keyword")
+                body.start_point.row == body.prev_sibling.start_point.row,
+                self.error(body.start_point, "Left bracket not on separate line")
             )
 
+            # Open braket should be indented by two whitespaces
             self.style_assert(
-                (value.next_sibling.start_point.column - value.end_point.column) != 0,
-                self.error(value.next_sibling.end_point, "Missing whitespace after keyword")
+                body.start_point.column != indent + 2,
+                self.error(body.start_point, "Wrong indentation")
+            )
+
+            for n in body.named_children:
+                self.__check_indents(indent + 4, n)
+
+            # Close braket should be on separate line
+            self.style_assert(
+                body.children[-1].start_point.row == body.children[-2].start_point.row,
+                self.error(body.start_point, "Left bracket not on separate line")
+            )
+
+            # Close braket should be indented by two whitespaces
+            self.style_assert(
+                body.children[-1].start_point.column != indent + 2,
+                self.error(body.children[-1].start_point, "Wrong indentation")
             )
         else:
-            self.style_assert(
-                (case_keyword.next_sibling.start_point.column - case_keyword.end_point.column) != 0,
-                self.error(case_keyword.next_sibling.end_point, "Missing whitespace after keyword")
-            )
+            for n in node.children[offset:]:
+                self.__check_indents(indent + 2, n)
 
-        for n in node.children[3:]:
-            self.__check_indents(indent + 2, n)
