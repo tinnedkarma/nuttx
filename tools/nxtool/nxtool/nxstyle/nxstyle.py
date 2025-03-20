@@ -4,6 +4,7 @@ entrypoint for nxstyle module
 from pathlib import Path
 import sys
 import importlib.resources
+import re
 
 from abc import ABC, abstractmethod
 from typing import Generator
@@ -104,7 +105,7 @@ class CChecker(Checker):
     Checker class for analyzing and processing syntax trees for c source files.
     """
 
-    def __init__(self, file: Path, scm: str) -> None:
+    def __init__(self, file: Path, scm: str):
 
         try:
             with open(file.as_posix(), 'rb') as fd:
@@ -120,9 +121,33 @@ class CChecker(Checker):
         super().__init__(file, tree, parser, lang, scm)
 
     def check_style(self) -> None:
-        for m in self.captures["function.body"]:
-            for n in iter(m.named_children):
-                self.__check_indents(2, n)
+        if "function.body" in self.captures:
+            for m in self.captures["function.body"]:
+                for n in iter(m.named_children):
+                    self.__check_indents(2, n)
+
+        if "expression.paranthesis" in self.captures:
+            for m in self.captures["expression.paranthesis"]:
+                if m.parent.type in {
+                    "if_statement",
+                    "for_statement",
+                    "while_statement",
+                    "do_statement",
+                    "switch_statement",
+                }:
+                    self.style_assert(
+                        (m.start_point.column - m.prev_sibling.end_point.column) != 1,
+                        self.error(
+                            m.start_point, 
+                            "There should be exacly one whitespace after keyword"
+                        )
+                    )
+
+                self.__check_whitespaces(m)
+
+        if "list.arguments" in self.captures:
+            for m in self.captures["list.arguments"]:
+                self.__check_whitespaces(m)
 
     def __check_indents(self, indent: int, node: Node):
         """
@@ -209,20 +234,14 @@ class CChecker(Checker):
                 self.error(alternative.start_point, "Wrong indentation")
             )
 
-            # Rest of the else body should be checked for indents
-            self.__check_indents(indent, alternative.children[1])
+            if alternative.children[1].type == "if_statement":
+                self.__check_indents_if_statement(indent, alternative.children[1])
+
+            else:
+                # Rest of the else body should be checked for indents
+                self.__check_indents(indent, alternative.children[1])
 
     def  __check_indents_for_statement(self, indent: int, node: Node) -> None:
-        """
-        Defered work for for statements.
-        For statement node checks should take into account the node structure.
-        Indent and alignments checks will be handled here
-
-        :param indent: The current indent level.
-        :type indent: int
-        :param node: The node to check.
-        :type node: Node
-        """
 
         body: Node = node.child_by_field_name("body")
 
@@ -268,16 +287,6 @@ class CChecker(Checker):
                     self.__check_indents(indent + 4, n)
 
     def __check_indents_while_statement(self, indent: int, node: Node) -> None:
-        """
-        Defered work for while statements.
-        While statement node checks should take into account the node structure.
-        Indent and alignments checks will be handled here
-
-        :param indent: The current indent level.
-        :type indent: int
-        :param node: The node to check.
-        :type node: Node
-        """
 
         body: Node = node.child_by_field_name("body")
 
@@ -309,16 +318,6 @@ class CChecker(Checker):
         )
 
     def __check_indents_switch_statement(self, indent: int, node: Node) -> None:
-        """
-        Defered work for switch statements.
-        Switch statement node checks should take into account the node structure.
-        Indent and alignments checks will be handled here.
-
-        :param indent: The current indent level.
-        :type indent: int
-        :param node: The node to check.
-        :type node: Node
-        """
 
         body: Node = node.child_by_field_name("body")
 
@@ -351,16 +350,6 @@ class CChecker(Checker):
         )
 
     def __check_indents_case_statement(self, indent: int, node: Node) -> None:
-        """
-        Defered work for case statements.
-        Case statement node checks should take into account the node structure.
-        Indent and alignments checks will be handled here.
-
-        :param indent: The current indent level.
-        :type indent: int
-        :param node: The node to check.
-        :type node: Node
-        """
 
         kw: Node = node.children[0]
         offset: int = 3 if kw.type == "case" else 2
@@ -402,3 +391,37 @@ class CChecker(Checker):
             for n in node.children[offset:]:
                 self.__check_indents(indent + 2, n)
 
+    def __check_whitespaces(self, node: Node) -> None:
+        self.style_assert(
+            bool(re.search(r"\(\s+", node.text.decode())),
+            self.error(node.start_point, "Whitespace after open paranthesis")
+        )
+
+        self.style_assert(
+            bool(re.search(r"\s+\)", node.text.decode())),
+            self.error(node.start_point, "Whitespace before close paranthesis")
+        )
+
+        self.style_assert(
+            bool(
+                re.search(r"(?<!\s)(\|\||&&|<<=|>>=|[+\*\/%&|^<>!=]=)", node.text.decode())
+            ),
+            self.error(node.start_point, "Missing whitespaces before operator")
+        )
+
+        self.style_assert(
+            bool(
+                re.search(r"(\|\||&&|<<=|>>=|[+\*\/%&|^<>!=]=)(?!\s)", node.text.decode())
+            ),
+            self.error(node.start_point, "Missing whitespaces after operator")
+        )
+
+        self.style_assert(
+            bool(
+                re.search(
+                    r",(?!\s)", 
+                    re.sub(r"([\"\'].*?\")", "", node.text.decode())
+                )
+            ),
+            self.error(node.start_point, "Missing whitespaces after comma")
+        )
