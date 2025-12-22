@@ -1831,6 +1831,12 @@ config ARCH_BOARD_NUCLEO_F412ZG
 		This is a minimal configuration that supports low-level test of the
 		Nucleo F412ZG in the NuttX source tree.
 
+config ARCH_BOARD_DATS
+	bool "STM32F413 based DATS board"
+	depends on ARCH_CHIP_STM32F413RG
+	---help---
+        BlueStreamline`s DATS board based on the STMicro STM32F413RG MCU.
+
 config ARCH_BOARD_NUCLEO_F446RE
 	bool "STM32F446 Nucleo F446RE"
 	depends on ARCH_CHIP_STM32F446R
@@ -3672,6 +3678,7 @@ config ARCH_BOARD
 	default "nucleo-f446re"                if ARCH_BOARD_NUCLEO_F446RE
 	default "nucleo-f410rb"                if ARCH_BOARD_NUCLEO_F410RB
 	default "nucleo-f412zg"                if ARCH_BOARD_NUCLEO_F412ZG
+    default "dats"                         if ARCH_BOARD_DATS
 	default "stm32g071b-disco"             if ARCH_BOARD_STM32G071B_DISCO
 	default "nucleo-g070rb"                if ARCH_BOARD_NUCLEO_G070RB
 	default "nucleo-g071rb"                if ARCH_BOARD_NUCLEO_G071RB
@@ -4533,6 +4540,9 @@ source "boards/arm/stm32/nucleo-f410rb/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F412ZG
 source "boards/arm/stm32/nucleo-f412zg/Kconfig"
+endif
+if ARCH_BOARD_DATS
+source "boards/arm/stm32/dats/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F446RE
 source "boards/arm/stm32/nucleo-f446re/Kconfig"
