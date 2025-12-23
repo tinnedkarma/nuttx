@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32_NUCLEO_F412ZG_SRC_NUCLEO_F412ZG_H
-#define __BOARDS_ARM_STM32_NUCLEO_F412ZG_SRC_NUCLEO_F412ZG_H
+#ifndef __BOARDS_ARM_STM32_DATS_H
+#define __BOARDS_ARM_STM32_DATS_H
 
 /****************************************************************************
  * Included Files
@@ -66,4 +66,4 @@
 
 int stm32_bringup(void);
 
-#endif /* __BOARDS_ARM_STM32_NUCLEO_F412ZG_SRC_NUCLEO_F412ZG_H */
+#endif /* __BOARDS_ARM_STM32_DATS_H */

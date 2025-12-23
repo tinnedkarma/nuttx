@@ -37,7 +37,7 @@
 #include <stm32_uart.h>
 
 #include <arch/board/board.h>
-#include "nucleo-f412zg.h"
+#include "dats.h"
 
 /****************************************************************************
  * Public Functions

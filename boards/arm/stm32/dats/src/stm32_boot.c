@@ -34,7 +34,7 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "nucleo-f412zg.h"
+#include "dats.h"
 
 #include <nuttx/fs/fs.h>
 
