@@ -176,6 +176,9 @@
 #if defined(CONFIG_STM32_STM32F446)
 #  define STM32_IRQ_RESERVED61   (STM32_IRQ_FIRST+61) /* 61: Reserved */
 #  define STM32_IRQ_RESERVED62   (STM32_IRQ_FIRST+62) /* 62: Reserved */
+#elif defined(CONFIG_STM32_STM32F413)
+#  define STM32_IRQ_DFSDM1FLT0    (STM32_IRQ_FIRST+61) /* 61: DFSDM1 filter 0 global interrupt */
+#  define STM32_IRQ_DFSDM1FLT1    (STM32_IRQ_FIRST+62) /* 62: DFSDM1 filter 1 global interrupt */
 #else
 #  define STM32_IRQ_ETH          (STM32_IRQ_FIRST+61) /* 61: Ethernet global interrupt */
 #  define STM32_IRQ_ETHWKUP      (STM32_IRQ_FIRST+62) /* 62: Ethernet Wakeup through EXTI line interrupt */
@@ -208,6 +211,14 @@
 #  define STM32_IRQ_RESERVED76   (STM32_IRQ_FIRST+76) /* 76: Reserved */
 #  define STM32_IRQ_RESERVED77   (STM32_IRQ_FIRST+77) /* 77: Reserved */
 #  define STM32_IRQ_RESERVED78   (STM32_IRQ_FIRST+78) /* 78: Reserved */
+#elif defined(CONFIG_STM32_STM32F413)
+#  define STM32_IRQ_I2C3EV       (STM32_IRQ_FIRST+72) /* 72: I2C3 event interrupt */
+#  define STM32_IRQ_I2C3ER       (STM32_IRQ_FIRST+73) /* 73: I2C3 error interrupt */
+#  define STM32_IRQ_CAN3TX       (STM32_IRQ_FIRST+74) /* 63: CAN2 TX interrupts */
+#  define STM32_IRQ_CAN3RX0      (STM32_IRQ_FIRST+75) /* 64: CAN2 RX0 interrupts */
+#  define STM32_IRQ_CAN3RX1      (STM32_IRQ_FIRST+76) /* 65: CAN2 RX1 interrupt */
+#  define STM32_IRQ_CAN3SCE      (STM32_IRQ_FIRST+77) /* 66: CAN2 SCE interrupt */
+#  define STM32_IRQ_RESERVED78   (STM32_IRQ_FIRST+78) /* 78: Reserved */
 #else
 #  define STM32_IRQ_I2C3EV       (STM32_IRQ_FIRST+72) /* 72: I2C3 event interrupt */
 #  define STM32_IRQ_I2C3ER       (STM32_IRQ_FIRST+73) /* 73: I2C3 error interrupt */
@@ -234,7 +245,7 @@
 #define STM32_IRQ_FPU            (STM32_IRQ_FIRST+81) /* 81: FPU global interrupt */
 
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
-    defined(CONFIG_STM32_STM32F469)
+    defined(CONFIG_STM32_STM32F469) || defined(CONFIG_STM32_STM32F413)
 #  define STM32_IRQ_UART7        (STM32_IRQ_FIRST+82) /* 82: UART7 interrupt */
 #  define STM32_IRQ_UART8        (STM32_IRQ_FIRST+83) /* 83: UART8 interrupt */
 #elif defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F410)
@@ -245,7 +256,8 @@
 #if defined(CONFIG_STM32_STM32F410)
 #  define STM32_IRQ_RESERVED84   (STM32_IRQ_FIRST+84) /* 84: Reserved */
 #elif defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
-    defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469)
+    defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469) || \
+    defined(CONFIG_STM32_STM32F413)
 #  define STM32_IRQ_SPI4         (STM32_IRQ_FIRST+84) /* 84: SPI4 interrupt */
 #endif
 
@@ -253,9 +265,12 @@
 #  define STM32_IRQ_SPI5         (STM32_IRQ_FIRST+85) /* 85: SPI5 interrupt */
 #  define STM32_IRQ_RESERVED86   (STM32_IRQ_FIRST+86) /* 86: Reserved */
 #elif defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
-    defined(CONFIG_STM32_STM32F469)
+    defined(CONFIG_STM32_STM32F469) 
 #  define STM32_IRQ_SPI5         (STM32_IRQ_FIRST+85) /* 85: SPI5 interrupt */
 #  define STM32_IRQ_SPI6         (STM32_IRQ_FIRST+86) /* 86: SPI6 interrupt */
+#elif defined(CONFIG_STM32_STM32F413)
+#  define STM32_IRQ_SPI5         (STM32_IRQ_FIRST+85) /* 85: SPI5 interrupt */
+#  define STM32_IRQ_RESERVED86   (STM32_IRQ_FIRST+86) /* 86: Reserved */
 #elif defined(CONFIG_STM32_STM32F446)
 #  define STM32_IRQ_RESERVED85   (STM32_IRQ_FIRST+85) /* 85: Reserved */
 #  define STM32_IRQ_RESERVED86   (STM32_IRQ_FIRST+86) /* 86: Reserved */
@@ -264,7 +279,8 @@
 #if defined(CONFIG_STM32_STM32F410)
 #  define STM32_IRQ_RESERVED87   (STM32_IRQ_FIRST+87) /* 87: Reserved */
 #elif defined(CONFIG_STM32_STM32F429) || defined(CONFIG_STM32_STM32F446) || \
-    defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469)
+    defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469) || \
+    defined(CONFIG_STM32_STM32F413)
 #  define STM32_IRQ_SAI1         (STM32_IRQ_FIRST+87) /* 87: SAI1 interrupt */
 #endif
 
@@ -272,6 +288,12 @@
 #  define STM32_IRQ_LTDCINT      (STM32_IRQ_FIRST+88) /* 88: LTDCINT interrupt */
 #  define STM32_IRQ_LTDCERRINT   (STM32_IRQ_FIRST+89) /* 89: LTDCERRINT interrupt */
 #  define STM32_IRQ_DMA2D        (STM32_IRQ_FIRST+90) /* 90: DMA2D interrupt */
+#elif defined(CONFIG_STM32_STM32F413)
+#  define STM32_IRQ_UART9        (STM32_IRQ_FIRST+88)  /* 88: UART9 global interrupt */
+#  define STM32_IRQ_UART10       (STM32_IRQ_FIRST+89)  /* 89: UART10 global interrupt */
+#  define STM32_IRQ_RESERVED90   (STM32_IRQ_FIRST+90)  /* 90: Reserved */
+#  define STM32_IRQ_RESERVED91   (STM32_IRQ_FIRST+91)  /* 91: Reserved */
+#  define STM32_IRQ_QUADSPI      (STM32_IRQ_FIRST+92)  /* 92: QuadSPI Global interrupt */
 #elif defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F410)
 #  define STM32_IRQ_RESERVED88   (STM32_IRQ_FIRST+88) /* 88: Reserved */
 #  define STM32_IRQ_RESERVED89   (STM32_IRQ_FIRST+89) /* 89: Reserved */
@@ -287,11 +309,17 @@
 #elif defined(CONFIG_STM32_STM32F469)
 #  define STM32_IRQ_QUADSPI      (STM32_IRQ_FIRST+91) /* 92: QuadSPI Global interrupt */
 #  define STM32_IRQ_DSI          (STM32_IRQ_FIRST+92) /* 91: DSI Global interrupt */
+
 #endif
 
 #if defined(CONFIG_STM32_STM32F446)
 #  define STM32_IRQ_HDMICEC      (STM32_IRQ_FIRST+93) /* 93: HDMI-CEC Global interrupt */
 #  define STM32_IRQ_SPDIFRX      (STM32_IRQ_FIRST+94) /* 94: SPDIF-Rx Global interrupt */
+#  define STM32_IRQ_FMPI2C1      (STM32_IRQ_FIRST+95) /* 95: FMPI2C1 event interrupt */
+#  define STM32_IRQ_FMPI2C1ERR   (STM32_IRQ_FIRST+96) /* 96: FMPI2C1 Error event interrupt */
+#elif defined(CONFIG_STM32_STM32F413)
+#  define STM32_IRQ_RESERVED93   (STM32_IRQ_FIRST+93) /* 93: Reserved */
+#  define STM32_IRQ_RESERVED94   (STM32_IRQ_FIRST+94) /* 94: Reserved */
 #  define STM32_IRQ_FMPI2C1      (STM32_IRQ_FIRST+95) /* 95: FMPI2C1 event interrupt */
 #  define STM32_IRQ_FMPI2C1ERR   (STM32_IRQ_FIRST+96) /* 96: FMPI2C1 Error event interrupt */
 #endif
@@ -302,6 +330,15 @@
 #  define STM32_IRQ_RESERVED95   (STM32_IRQ_FIRST+95) /* 95: Reserved */
 #  define STM32_IRQ_RESERVED96   (STM32_IRQ_FIRST+96) /* 96: Reserved */
 #  define STM32_IRQ_RESERVED97   (STM32_IRQ_FIRST+97) /* 97: Reserved */
+#endif
+
+#if defined(CONFIG_STM32_STM32F413)
+#  define STM32_IRQ_EXTI23 (STM32_IRQ_FIRST+97) /* 97: EXTI Line 23 interrupts */
+#  define STM32_IRQ_LPTIM1 (STM32_IRQ_FIRST+97) /* 97: LPTIM1 global interrupt */
+#  define STM32_IRQ_DFSDM2FLT0 (STM32_IRQ_FIRST+98) /* 98: DFSDM2 filter 0 global interrupt */
+#  define STM32_IRQ_DFSDM2FLT1 (STM32_IRQ_FIRST+99) /* 99: DFSDM2 filter 1 global interrupt */
+#  define STM32_IRQ_DFSDM2FLT2 (STM32_IRQ_FIRST+100) /* 100: DFSDM2 filter 2 global interrupt */
+#  define STM32_IRQ_DFSDM2FLT3 (STM32_IRQ_FIRST+101) /* 101: DFSDM2 filter 3 global interrupt */
 #endif
 
 #if defined(CONFIG_STM32_STM32F401) || defined(CONFIG_STM32_STM32F411) || \

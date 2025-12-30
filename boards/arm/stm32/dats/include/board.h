@@ -43,18 +43,17 @@
  */
 
 #define STM32_BOARD_USEHSE      1
-#define STM32_BOARD_XTAL        8000000
-#define STM32_HSE_FREQUENCY     STM32_BOARD_XTAL
+#define STM32_HSE_FREQUENCY     8000000ul
 
 #define STM32_HSI_FREQUENCY     16000000ul
 #define STM32_LSI_FREQUENCY     32000
 
 /* Main PLL Configuration */
 
-#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(8)
-#define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(384)
-#define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP_4
-#define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(8)
+#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(4)
+#define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(100)
+#define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP_2
+#define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(2)
 
 #define STM32_RCC_PLLI2SCFGR_PLLI2SM RCC_PLLI2SCFGR_PLLI2SM(16)
 #define STM32_RCC_PLLI2SCFGR_PLLI2SN RCC_PLLI2SCFGR_PLLI2SN(192)
@@ -66,14 +65,14 @@
 #define STM32_RCC_DCKCFGR2_FMPI2C1SEL RCC_DCKCFGR2_FMPI2C1SEL_APB
 #define STM32_RCC_DCKCFGR2_SDIOSEL RCC_DCKCFGR2_SDIOSEL_48MHZ
 
-#define STM32_SYSCLK_FREQUENCY  96000000ul
+#define STM32_SYSCLK_FREQUENCY  100000000ul
 
-/* AHB clock (HCLK) is SYSCLK (96MHz) */
+/* AHB clock (HCLK) is SYSCLK (100MHz) */
 
 #define STM32_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK      /* HCLK  = SYSCLK / 1 */
 #define STM32_HCLK_FREQUENCY    STM32_SYSCLK_FREQUENCY
 
-/* APB1 clock (PCLK1) is HCLK/2 (48MHz) */
+/* APB1 clock (PCLK1) is HCLK/2 (50MHz) */
 
 #define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLKd2     /* PCLK1 = HCLK / 2 */
 #define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
@@ -88,7 +87,7 @@
 #define STM32_APB1_TIM13_CLKIN  (2*STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM14_CLKIN  (2*STM32_PCLK1_FREQUENCY)
 
-/* APB2 clock (PCLK2) is HCLK (96MHz) */
+/* APB2 clock (PCLK2) is HCLK (100MHz) */
 
 #define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLK       /* PCLK2 = HCLK */
 #define STM32_PCLK2_FREQUENCY   (STM32_HCLK_FREQUENCY)
@@ -122,48 +121,5 @@
 
 #define GPIO_USART1_RX   GPIO_USART1_RX_1
 #define GPIO_USART1_TX   GPIO_USART1_TX_1
-
-#define GPIO_LD1 \
-(GPIO_PORTB | GPIO_PIN0 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | \
-GPIO_SPEED_50MHz)
-
-#define GPIO_LD2 \
-(GPIO_PORTB | GPIO_PIN7 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | \
-GPIO_SPEED_50MHz)
-
-#define GPIO_LD3 \
-(GPIO_PORTB | GPIO_PIN14 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | \
-GPIO_SPEED_50MHz)
-
-/* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
- * defined.  In that case, the usage by the board port is defined in
- * include/board.h and src/sam_leds.c. The LEDs are used to encode OS-related
- * events as follows when the red LED (PE24) is available:
- *
- *   SYMBOL                Meaning
- *   -------------------  -----------------------
- *   LED_STARTED          NuttX has been started
- *   LED_HEAPALLOCATE     Heap has been allocated
- *   LED_IRQSENABLED      Interrupts enabled
- *   LED_STACKCREATED     Idle stack created
- *   LED_INIRQ            In an interrupt
- *   LED_SIGNAL           In a signal handler
- *   LED_ASSERTION        An assertion failed
- *   LED_PANIC            The system has crashed
- *   LED_IDLE             MCU is is sleep mode
- *
- * Thus if LD2, NuttX has successfully booted and is, apparently, running
- * normally.  If LD2 is flashing at approximately 2Hz, then a fatal error
- * has been detected and the system has halted.
- */
-
-#define LED_STARTED      1
-#define LED_HEAPALLOCATE 0
-#define LED_IRQSENABLED  0
-#define LED_STACKCREATED 3
-#define LED_INIRQ        0
-#define LED_SIGNAL       0
-#define LED_ASSERTION    1
-#define LED_PANIC        1
 
 #endif /* __BOARDS_ARM_STM32_DATS_INCLUDE_BOARD_H */
