@@ -50,7 +50,7 @@
 
 /* Main PLL Configuration */
 
-#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(4)
+#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(8)
 #define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(100)
 #define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP_2
 #define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(2)
@@ -113,13 +113,17 @@
 #define BOARD_TIM7_FREQUENCY    (2 * STM32_PCLK1_FREQUENCY)
 #define BOARD_TIM8_FREQUENCY    (2 * STM32_PCLK2_FREQUENCY)
 
-/* Alternate function pin selections ****************************************/
-/* USART6:
- *  RXD: PG9    CN10 pin 16
- *  TXD: PG14   CN10 pin 14
- */
-
 #define GPIO_USART1_RX   GPIO_USART1_RX_1
 #define GPIO_USART1_TX   GPIO_USART1_TX_1
+
+#define GPIO_CAN1_TX    GPIO_CAN1_TX_1
+#define GPIO_CAN1_RX    GPIO_CAN1_RX_1
+
+#define GPIO_CAN2_TX    GPIO_CAN2_TX_1
+#define GPIO_CAN2_RX    GPIO_CAN2_RX_1
+
+#define GPIO_SPI2_MISO GPIO_SPI2_MISO_2
+#define GPIO_SPI2_MOSI GPIO_SPI2_MOSI_2
+#define GPIO_SPI2_SCK  GPIO_SPI2_SCK_6
 
 #endif /* __BOARDS_ARM_STM32_DATS_INCLUDE_BOARD_H */
